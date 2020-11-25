@@ -1,25 +1,21 @@
-const sqlite = require('sqlite3');
+const sqlite = require("sqlite3");
 
-let db = null;
+var db = getDb();
 
-function initialize() {
-  db = new sqlite.Database('./db/data.db',
-    (error) => {
-
-      if (error) console.log('failed to connect to db;');
-      console.log('Connected to database');
+const Query = async (sql, params) => {
+  db = getDb();
+  return new Promise((resolve, reject) => {
+    db.all(sql, params, (err, rows) => {
+      db.close();
+      if (err) reject(err);
+      resolve(rows);
     });
-
-  return db;
-
-}
-
+  });
+};
 function getDb() {
-  if (db === null) initialize();
-  return db;
+  return new sqlite.Database("./db/data.db");
 }
-
 
 module.exports = {
-  getDb, initialize,
+  Query,
 };

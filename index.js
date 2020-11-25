@@ -3,12 +3,7 @@ const cors = require('express-cors');
 const sqlite3 = require('sqlite3');
 
 const express = require('express');
-const db = new sqlite3.Database(
-  './db/data.db',
-  (error) => {
-    if (error) return console.log('Failed to connect to database', error);
-    console.log('Connected to database');
-  });
+
 
 
 
@@ -31,11 +26,7 @@ app.use(cors({
   ]
 }));
 
-//close db connection on error
-app.use((err, req, res, next) => {
-  db.close();
-  next(err);
-});
+
 
 
 app.use('/sources', sourceRoutes);
@@ -49,10 +40,3 @@ app.get('/', (req, res) => res.send('welcome to the aqivah api'));
 
 app.listen(PORT, () => console.log('listening on port ' + PORT));
 
-// module.exports.db = db;
-module.exports.db = db;
-
-// exports.db = db;
-// exports.getDb = getDb;
-
-// module.exports = { db, getDb };

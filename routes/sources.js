@@ -1,36 +1,32 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const data = require('./../data');
-const { db } = require('../index');
+const data = require("./../data");
+const { db } = require("../index");
+const { Query } = require("../db/db");
+const Error = {
+  data: null,
+  error: "No data found",
+};
 
-router.get('/', (req, res) => {
-  console.log("req.body", req.query);
-  const requestOptions = {
-    getNextSource: 'getNextSource',
-  };
-
-  let response = 'Invalid request';
-
-  if (req.query.request === requestOptions.getNextSource) {
-    console.log('called api /sources with req getnextsource');
-    response = getNextSource();
+router.get("/", async (req, res) => {
+  var data = null;
+  try {
+    data = await Query("SELECT * FROM sources");
+  } catch (e) {
+    console.log(e);
   }
-
-  if (!req.query.request)
-    response = data.sources;
-
-  res.send(response);
+  if (!data) {
+    res.status(200).send(Error);
+  } else {
+    res.send(data);
+  }
 });
 
-router.post('/', (req, res) => {
-  console.log('received source -> ', req.body);
+router.post("/", (req, res) => {
+  console.log("received source -> ", req.body);
   res.send("Success");
 });
 
 module.exports = router;
 
 
-function getNextSource() {
-  console.log('source to use -> ', data.sources[2]);
-  return data.sources[2];
-}
