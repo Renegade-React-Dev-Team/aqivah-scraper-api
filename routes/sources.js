@@ -1,8 +1,8 @@
 const express = require("express");
 const router = express.Router();
-const data = require("./../data");
 const { db } = require("../index");
 const { Query } = require("../db/db");
+const { v4: uuid } = require("uuid");
 const Error = {
   data: null,
   error: "No data found",
@@ -22,9 +22,25 @@ router.get("/", async (req, res) => {
   }
 });
 
-router.post("/", (req, res) => {
-  console.log("received source -> ", req.body);
-  res.send("Success");
+router.post("/", async (req, res) => {
+  let data = null;
+  let {name,fields,startScraping, url  } = req.body;
+  let id = uuid();
+  const query = `
+  INSERT INTO sources (id, label, uri,isActive, paginationTypeId) VALUES (?,?,?,?,?);
+  `;
+  
+  try {
+    data = await Query(query, [id, name, url, startScraping,fields]);
+    if(Array.isArray(data))data={success: true};
+  } catch (e) {
+    console.log(e);
+  }
+  if (!data) {
+    res.status(200).send(Error);
+  } else {
+    res.send(data);
+  }
 });
 
 module.exports = router;

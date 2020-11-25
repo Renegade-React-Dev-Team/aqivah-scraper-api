@@ -27,8 +27,8 @@ routes.get("/", async (req, res) => {
   }
 });
 
-routes.post("/", (req, res) => {
-  const db = getDb();
+routes.post("/", async (req, res) => {
+  
   const { name } = req.body;
   console.log("incoming name -> ", name);
   const id = uuid();
@@ -36,16 +36,19 @@ routes.post("/", (req, res) => {
   INSERT INTO fieldTypes
   (id, label)
   VALUES
-  (?, ?)
-  `;
-  db.run(query, [id, name], (err) => {
-    if (err) {
-      console.log("error -> ", err);
-      res.sendStatus(400).send(err);
-      return;
-    }
-    res.send(name);
-  });
+  (?,?)`;
+  try {
+    data = await Query(query, [id,name]);
+    if(Array.isArray(data))data={success: true};
+  } catch (e) {
+    console.log(e);
+  }
+  if (!data) {
+    res.status(200).send(Error);
+  } else {
+    res.send(data);
+  }
+  
   // res.send(name);
 });
 
@@ -100,21 +103,27 @@ routes.put("/:id", (req, res) => {
   });
 });
 
-router.delete("/:id", (req, res) => {
+
+
+routes.delete("/:id", async (req, res) => {
+  console.log(req.body)
   const { id } = req.params;
   const query = `
   DELETE FROM fieldTypes
   WHERE id = ?;
   `;
-  db.run(query, [id], (error, rows) => {
-    console.log({ error, rows });
-    if (error) {
-      console.log("error deleting field type -> ", error);
-      return res.sendStatus(404);
-    }
-    console.log("result of deletion -> ", rows);
-    res.sendStatus(204);
-  });
+  try {
+    data = await Query(query, [id]);
+    if(Array.isArray(data))data={success: true};
+  } catch (e) {
+    console.log(e);
+  }
+  if (!data) {
+    res.status(200).send(Error);
+  } else {
+    res.send(data);
+  }
+  
 });
 
 module.exports = routes;
