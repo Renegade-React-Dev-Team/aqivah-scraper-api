@@ -5,7 +5,9 @@ const sqlite3 = require('sqlite3');
 const express = require('express');
 
 
-
+const Scrape = require('./scraper');
+let g = new Scrape();
+g.scrape();
 
 
 
