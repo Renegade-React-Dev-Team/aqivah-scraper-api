@@ -11,7 +11,7 @@ const Error = {
 router.get("/", async (req, res) => {
   var data = null;
   try {
-    data = await Query("SELECT * FROM sources");
+    data = await Query("SELECT * FROM sourceFields v LEFT JOIN sources d ON v.sourceId = d.id");
     console.log(data);
   } catch (e) {
     console.log(e);
@@ -25,14 +25,14 @@ router.get("/", async (req, res) => {
 
 router.post("/", async (req, res) => {
   let data = null;
-  let {name,fields,startScraping, url  } = req.body;
+  let {field,fieldType, source, selector  } = req.body;
   let id = uuid();
   const query = `
-  INSERT INTO sources (id, label, uri,isActive, paginationTypeId) VALUES (?,?,?,?,?);
+  INSERT INTO sourceFields (id, fieldId, sourceId,typeId, selector) VALUES (?,?,?,?,?);
   `;
   
   try {
-    data = await Query(query, [id, name, url, startScraping,fields]);
+    data = await Query(query, [id, field.id, source.id, fieldType.id,selector]);
     if(Array.isArray(data))data={success: true};
   } catch (e) {
     console.log(e);

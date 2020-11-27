@@ -5,11 +5,13 @@ var db = getDb();
 const Query = async (sql, params) => {
   db = getDb();
   return new Promise((resolve, reject) => {
-    db.all(sql, params, (err, rows) => {
-      db.close();
-      if (err) reject(err);
-      resolve(rows);
-    });
+    db.serialize(()=>{
+      db.all(sql, params, (err, rows) => {
+        // db.close();
+        if (err) reject(err);
+        resolve(rows);
+      });
+    })
   });
 };
 function getDb() {

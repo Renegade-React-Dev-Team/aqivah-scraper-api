@@ -9,7 +9,25 @@ const Error = {
   error: "No data found",
 };
 
-routes.get("/", async (req, res) => {
+async function getTypeById(id){
+    let data = await Query(`Select * from fieldTypes where id=${id}`);
+    return data;
+}
+
+routes.get("/:id?", async (req, res) => {
+ if(req.params.id){
+  var data = null;
+  try {
+    data = await getTypeById(req.params.id)
+  } catch (e) {
+    console.log(e);
+  }
+  if (!data) {
+    res.status(200).send(Error);
+  } else {
+    res.send(data);
+  }
+ }else{
   const query = `
   SELECT *
   FROM fieldTypes
@@ -25,6 +43,8 @@ routes.get("/", async (req, res) => {
   } else {
     res.send(data);
   }
+ }
+
 });
 
 routes.post("/", async (req, res) => {
