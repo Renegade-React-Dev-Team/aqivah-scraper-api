@@ -12,7 +12,7 @@ router.get("/", async (req, res) => {
   var data = null;
   try {
     data = await Query("SELECT * FROM sourceFields v LEFT JOIN sources d ON v.sourceId = d.id");
-    console.log(data);
+    
   } catch (e) {
     console.log(e);
   }

@@ -1,13 +1,12 @@
 const bodyParser = require('body-parser');
 const cors = require('express-cors');
 const sqlite3 = require('sqlite3');
-
+const Scheduler = require('./job')
 const express = require('express');
 
-
+Scheduler();
 const Scrape = require('./scraper');
-let g = new Scrape();
-g.scrape();
+
 
 
 

@@ -1,14 +1,33 @@
 var { Query } = require("../db/db");
+const { v4: uuid } = require("uuid");
+const puppeteer = require('puppeteer');
+const PageScraper = require('./pager')
+
 
 class Scraper {
   sites = [];
   finalData = [];
   loadedData = [];
-  query = "SELECT * from sources";
+  query = "SELECT * from sources LIMIT 1";
   constructor() {}
 
   scrape() {
     this.getSitesToScrape();
+  }
+
+  logScrape(){
+    return new Promise(async (resolve, reject) => {
+        var id = uuid();
+        try {
+          let data = await Query(
+            `INSERT into  = '${id}'`
+          );
+          if (data.length) resolve(data);
+          reject([]);
+        } catch (e) {
+          reject(e);
+        }
+      });
   }
 
   getFields(id) {
@@ -68,15 +87,41 @@ class Scraper {
     this.refineData();
   }
 
-  scrapeIt(fg){
-      console.log(fg)
+  async scrapeIt(fg){
+       await  this.startScrapingSession(fg.url, fg.fields)
   }
+
+  async startScrapingSession(url, fields){
+      var t = PageScraper;
+      t.url = url;
+      t.fields = fields;
+      var br = await this.getBrowser();
+      t.get(br)
+  }
+
+  async getBrowser(){
+    let browser;
+    try {
+        console.log("Opening the browser......");
+        browser = await puppeteer.launch({
+            headless: false,
+            args: ["--disable-setuid-sandbox"],
+            'ignoreHTTPSErrors': true
+        });
+    } catch (err) {
+        browser.close()
+        console.log("Could not create a browser instance => : ", err);
+    }
+    return browser;
+  }
+
 
   async refineData(d) {
     if (!d) d = this.loadedData;
     let pol = await this.getFieldDetails();
     let lok = await this.getTypeDetails();
-    d.map((data, ind) => {
+    console.log(lok)
+    d.map(async (data, ind) => {
       var t = {
         name: data.label,
         url: data.uri,
@@ -85,12 +130,13 @@ class Scraper {
         startFromPage: 0,
         paginationType: data.paginationTypeId,
         fields: data.fields.map((bv)=>{
-            return { label: pol.filter(m=>m.id == bv.fieldId)[0].label, selector: bv.selector, type: lok.filter(m=>m.id == bv.fieldId)[0].label }
+            return { label: pol.filter(m=>m.id == bv.fieldId)[0].label, selector: bv.selector, type: lok.filter(m=>m.id == bv.typeId)[0].label }
         })
       };
-      this.scrapeIt(t)
+     await this.scrapeIt(t)
     });
   }
 }
+
 
 module.exports = Scraper;
